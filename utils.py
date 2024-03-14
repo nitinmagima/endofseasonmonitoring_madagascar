@@ -378,9 +378,37 @@ def style_and_render_df_with_hyperlinks(df):
     rendered_html = styled_df.to_html(escape=False)
     display(HTML(rendered_html))
 
-def fetch_fewsnet_maadagascar(df):
+def fetch_fewsnet_maadagascar(country_code="MG", scenario='CS', regions_of_interest = ["Atsimo-Atsinanana", "Anosy", "Atsimo-Andrefana", "Androy"]):
+    """
+    Fetches and processes food security data from the FEWS NET API for Madagascar, 
+    filtering by specific scenarios and regions of interest.
+
+    This function queries the FEWS NET API for food security data related to 
+    Madagascar (or specified country code), processes the JSON response into a 
+    pandas DataFrame, and filters the data based on specified scenarios, 
+    months of interest, years of interest, and geographic regions.
+
+    Parameters:
+    - country_code (str): ISO 3166-1 alpha-2 country code, default 'MG' for Madagascar.
+    - scenario (str): FEWS NET scenario code, default 'CS' for Current Situation.
+    - regions_of_interest (list of str): List of regions within the country to filter the data by.
+
+    The function performs several data preprocessing steps:
+    1. Parses date columns to datetime.
+    2. Fills missing values and converts relevant columns to categorical types.
+    3. Filters data for months of interest (October to February) and years of interest (2023 and 2024).
+    4. Further filters data for the specified scenario and regions of interest.
+    5. Adds a 'region' column based on the 'geographic_unit_full_name' column.
+
+    Returns:
+    - pandas.DataFrame: Filtered and processed DataFrame containing the food security data
+      for the specified parameters.
+
+    Raises:
+    - HTTPError: An error from requests if the FEWS NET API call fails.
+    """
     # API URL
-    url = 'https://fdw.fews.net/api/ipcphase/?format=json&country_code=MG&fields=simple'
+    url = f'https://fdw.fews.net/api/ipcphase/?format=json&country_code={country_code}&fields=simple'
     
     # Make the API call
     response = requests.get(url)
@@ -434,11 +462,11 @@ def fetch_fewsnet_maadagascar(df):
     # Display the structure of the DataFrame after these changes and the count of missing values
     df.info(), missing_values
 
-    # Filtering the data for scenarios labeled as 'CS' or 'Current Situation'
-    df = df[df['scenario'] == 'CS']
+    # Filtering the data for scenarios, by default, for 'CS' or 'Current Situation'
+    df = df[df['scenario'] == scenario]
     
     # String search to filter the dataset for the specified regions 
-    regions_of_interest = ["Atsimo-Atsinanana", "Anosy", "Atsimo-Andrefana", "Androy"]
+    regions_of_interest = regions_of_interest
     df = df[
         df['geographic_unit_full_name'].str.contains('|'.join(regions_of_interest))
     ]
@@ -453,11 +481,5 @@ def fetch_fewsnet_maadagascar(df):
     # Applying the function to create the 'region' column
     df['region'] = df['geographic_unit_full_name'].apply(determine_region)
     
-    # Analyze the distribution of food security scenarios for the latest year in these regions
-    description_counts_latest_year = df['description'].value_counts()
-
-    # Performing a groupby operation on the 'region' column along with 'is_allowing_for_assistance' and 'description'
-    region_groupby_assistance_description = df.groupby(['region','is_allowing_for_assistance','description']).size().unstack(fill_value=0)
-    
-    description_counts_latest_year, df['region'].value_counts(), region_groupby_assistance_description
+    return df
 
