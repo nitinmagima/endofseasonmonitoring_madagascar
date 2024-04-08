@@ -1,4 +1,4 @@
-# Trigger Monitoring Dashboard for Anticipated Action  Guide
+# Trigger Monitoring Dashboard for Anticipatory Action (AA)
 
 Author - Nitin Magima
 
@@ -6,7 +6,7 @@ Date - March 2024
 
 Version - 1.0
 
-This is a README file created for the Trigger Monitoring Dashboard for Anticipated Action Programs for WFP in various 
+This is a README file created for the Trigger Monitoring Dashboard for Anticipatory Action Programs for WFP in various 
 countries. The dashboard has been built in python using "Shiny for Python". The struture is similar to the Python 
 maproom created for AA Design. The code base has been designed in such a way that only the YAML file needs to be 
 updated to create a new Trigger Monitoring Dashboard. The Trigger Monitoring Dashboard takes advantage of the map rooms 
